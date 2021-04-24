@@ -18,9 +18,10 @@ combinacoes_soma(N, Els, Soma, Combs) :- bagof(Comb, comb_soma_valida(N, Els, So
 % returns a sorted list with all possible permutations (...), also gaspa is love, gaspa is life 
 permutacoes_soma(N, Els, Soma, Perms) :- combinacoes_soma(N, Els, Soma, Combs), findall(Perm, (member(X, Combs), permutation(X, Perm)), UPerms), sort(1, @<, UPerms, Perms).
 
-% espaco_fila(Fila, Esp, H_V) , espaco(Soma, [variaveis]), unfinished mess
+% espaco_fila(Fila, Esp, H_V) , espaco(Soma, [variaveis]), unfinished mess cena para dizer a soma, cena para guardar vars
 
-espaco_fila(Fila, Esp, H_V) :- esp_fila_aux(Fila, Aux, Esp, H_V).
-esp_fila_aux([], Aux, Esp, H_V) :- member(Esp, Aux).
-esp_fila_aux([P | R], 
-esp_fila_aux([[V | _] | R], [Aux | E], Esp, v) :- Aux = espaco(V, Vars).
+espaco_fila(Fila, Esp, H_V) :- esp_fila_aux(Fila, Aux, [], [], H_V)
+esp_fila_aux([], Soma, Vars, Dir) :- 
+esp_fila_aux([[V | _] | R], V, Vars, v) :- esp_fila_aux(R, V, Vars, v).
+esp_fila_aux([[_ | H] | R], V, Vars, h) :- esp_fila_aux(R, H, Vars, h).
+esp_fila_aux([P | R], Soma, [P | ReV], Dir) :- esp_fila_aux(R, Soma, ReV, Dir)
