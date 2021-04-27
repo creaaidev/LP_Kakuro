@@ -23,7 +23,7 @@ combinacoes_soma(N, Els, Soma, Combs) :-
 % returns a sorted list with all possible permutations (...), also gaspa is love, gaspa is life 
 permutacoes_soma(N, Els, Soma, Perms) :-
 	combinacoes_soma(N, Els, Soma, Combs),
-	bagof(Perm, (member(X, Combs), permutation(X, Perm)), UPerms),
+	findall(Perm, (member(X, Combs), permutation(X, Perm)), UPerms),
 	sort(1, @<, UPerms, Perms).
 
 %TENHO DE TROCAR O MEMBER POR OUTRA CENA
@@ -90,7 +90,7 @@ espacos_puzzle_aux([L | R], H_V, OEsps, Esps) :-
 %espacos_com_posicoes_comuns(Espacos, Esp, Esps_com)
 %Order shouldn't be changed, Esps_com is a list with all the spaces that have shared variables with Esp
 espacos_com_posicoes_comuns(Esps, Esp, Esps_com) :-
-	bagof(E, (member(E, Esps), E \= Esp, partilha(E, Esp)), Esps_com).
+	bagof(E, (member(E, Esps), E \== Esp, partilha(E, Esp)), Esps_com).
 
 %TENHO DE TROCAR O MEMBER POR OUTRA CENA
 

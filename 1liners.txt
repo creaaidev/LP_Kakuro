@@ -1,0 +1,5 @@
+Puzzle = [[[0, 0], [0, 0], [0, 0], [17, 0], [10, 0]],[[0, 0], [24, 0], [11, 3], P24, P25],[[0,16], P32, P33, P34, P35],[[0,26], P42, P43, P44, P45],[[0,17], P52, P53, [0,0], [0,0]]],espacos_puzzle(Puzzle, Espacos),permutacoes_soma_espacos(Espacos, Perms_soma),Perms_soma = [PS1, PS2, PS3, PS4, PS5, PS6, PS7, PS8].
+Puzzle = [[[0,0], P24, P25], [[1,1], P26, P27]],espacos_puzzle(Puzzle, Espacos),permutacoes_soma_espacos(Espacos, Perms_soma),Perms_soma = [PS1, PS2].
+
+Puzzle = [[[0, 0], [0, 0], [0, 0], [17, 0], [10, 0]], [[0, 0], [24, 0], [11, 3], P24, P25], [[0,16], P32, P33, P34, P35], [[0,26], P42, P43, P44, P45], [[0,17], P52, P53, [0,0], [0,0]]], espacos_puzzle(Puzzle, Espacos), nth1(1, Espacos, Esp1), espacos_com_posicoes_comuns(Espacos, Esp1, Esps_com).
+
