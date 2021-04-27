@@ -26,6 +26,8 @@ permutacoes_soma(N, Els, Soma, Perms) :-
 	bagof(Perm, (member(X, Combs), permutation(X, Perm)), UPerms),
 	sort(1, @<, UPerms, Perms).
 
+%TENHO DE TROCAR O MEMBER POR OUTRA CENA
+
 % tou a 3+ horas nisto WOOOO WOOOO WOOOO
 % again tysm gaspa you are a real lifesaver, also trace helped a lot here
 % espaco_fila(Fila, Esp, H_V) , espaco(Soma, [variaveis])
@@ -59,6 +61,8 @@ espaco_fila_aux([], Esp, _, Soma, Vars, Esps) :-
 	append(Esps, Space, NEsps),	%Appends the last space
 	member(Esp, NEsps).		%Gets a member from Esps
 
+%TENHO DE TROCAR O MEMBER POR OUTRA CENA
+
 %espacos_fila(H_V, Fila, Espacos)
 %Gets all spaces from a Fila and saves them in Esps
 espacos_fila(H_V, Fila, Esps) :-
@@ -88,11 +92,14 @@ espacos_puzzle_aux([L | R], H_V, OEsps, Esps) :-
 espacos_com_posicoes_comuns(Esps, Esp, Esps_com) :-
 	bagof(E, (member(E, Esps), E \= Esp, partilha(E, Esp)), Esps_com).
 
+%TENHO DE TROCAR O MEMBER POR OUTRA CENA
+
 %Checks whether or not E shares variables with Esp
 partilha(espaco(_, Vars1), espaco(_, Vars2)) :-
 	bagof(Var, (member(Var, Vars1), member(Var, Vars2)), Vars),
 	length(Vars, Len),
 	Len > 0.
+%TENHO DE TROCAR O MEMBER POR OUTRA CENA
 
 %permutacoes_soma_espacos(Espacos, Perms_soma)
 %Perms_soma is a list of lists with 2 elements, first being a space from Espacos and second a list
@@ -104,15 +111,10 @@ permutacoes_soma_aux([], Perms_soma, Perms_soma).
 
 permutacoes_soma_aux([espaco(Soma, Vars) | R], OPerms, Perms_soma) :-
 	length(Vars, Len),
-	get_perms(Len, Soma, XPerms),
+	bagof(Perm, (permutacoes_soma(Len, [1,2,3,4,5,6,7,8,9], Soma, Perm)), XPerms),
 	append(XPerms, XXPerms),
 	sort(1, @=<, XXPerms, Perms),
 	append(OPerms, [[espaco(Soma, Vars), Perms]], NPerms),
 	permutacoes_soma_aux(R, NPerms, Perms_soma).
 %ta qql cena mal neste sort, n ta a dar bem sort como devia ser
-
-get_perms(Len, Soma, Perms) :-
-	bagof(Perm, (permutacoes_soma(Len, [1,2,3,4,5,6,7,8,9], Soma, Perm)), Perms).
-
-get_perms(Len, Soma, Perms) :-
-	\+bagof(Perm, (permutacoes_soma(Len, [1,2,3,4,5,6,7,8,9], Soma, Perm)), Perms).
+%possivelmente ate esta bem, problema qualquer com as 2 primeiras variaveis
