@@ -23,7 +23,7 @@ combinacoes_soma(N, Els, Soma, Combs) :-
 % returns a sorted list with all possible permutations (...), also gaspa is love, gaspa is life 
 permutacoes_soma(N, Els, Soma, Perms) :-
 	combinacoes_soma(N, Els, Soma, Combs),
-	bagof(Perm, (member(X, Combs), permutation(X, Perm)), UPerms),
+	findall(Perm, (member(X, Combs), permutation(X, Perm)), UPerms),
 	sort(1, @<, UPerms, Perms).
 
 %TENHO DE TROCAR O MEMBER POR OUTRA CENA
@@ -96,10 +96,17 @@ espacos_com_posicoes_comuns(Esps, Esp, Esps_com) :-
 
 %Checks whether or not E shares variables with Esp
 partilha(espaco(_, Vars1), espaco(_, Vars2)) :-
-	bagof(Var, (member(Var, Vars1), member(Var, Vars2)), Vars),
+	bagof(Var, (is_in(Var, Vars1), is_in(Var, Vars2)), Vars),
 	length(Vars, Len),
 	Len > 0.
+
+partilha(espaco(_, Vars1), espaco(_, Vars2)) :-
+	\+bagof(Var, (is_in(Var, Vars1), is_in(Var, Vars2)), _).
 %TENHO DE TROCAR O MEMBER POR OUTRA CENA
+
+is_in(_, []) :- fail.
+is_in(P, [F | _]) :- P == F.
+is_in(P, [F | R]) :- P \== F, is_in(P, R).
 
 %permutacoes_soma_espacos(Espacos, Perms_soma)
 %Perms_soma is a list of lists with 2 elements, first being a space from Espacos and second a list

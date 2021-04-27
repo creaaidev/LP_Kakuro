@@ -96,10 +96,17 @@ espacos_com_posicoes_comuns(Esps, Esp, Esps_com) :-
 
 %Checks whether or not E shares variables with Esp
 partilha(espaco(_, Vars1), espaco(_, Vars2)) :-
-	bagof(Var, (member(Var, Vars1), member(Var, Vars2)), Vars),
+	bagof(Var, (is_in(Var, Vars1), is_in(Var, Vars2)), Vars),
 	length(Vars, Len),
 	Len > 0.
+
+partilha(espaco(_, Vars1), espaco(_, Vars2)) :-
+	\+bagof(Var, (is_in(Var, Vars1), is_in(Var, Vars2)), _).
 %TENHO DE TROCAR O MEMBER POR OUTRA CENA
+
+is_in(_, []) :- fail.
+is_in(P, [F | _]) :- P == F.
+is_in(P, [F | R]) :- P \== F, is_in(P, R).
 
 %permutacoes_soma_espacos(Espacos, Perms_soma)
 %Perms_soma is a list of lists with 2 elements, first being a space from Espacos and second a list
