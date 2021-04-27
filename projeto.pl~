@@ -104,7 +104,7 @@ permutacoes_soma_aux([], Perms_soma, Perms_soma).
 
 permutacoes_soma_aux([espaco(Soma, Vars) | R], OPerms, Perms_soma) :-
 	length(Vars, Len),
-	get_perms(Len, Soma, XPerms),
+	bagof(Perm, (permutacoes_soma(Len, [1,2,3,4,5,6,7,8,9], Soma, Perm)), XPerms),
 	append(XPerms, XXPerms),
 	sort(1, @=<, XXPerms, Perms),
 	append(OPerms, [[espaco(Soma, Vars), Perms]], NPerms),
