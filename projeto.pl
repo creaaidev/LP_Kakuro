@@ -1,6 +1,6 @@
 % Martim Rosa Monis ist199281 :pray: :pavaobless:.
 
-% 6.5/20 Completeness Ratio
+% ?/20 Completeness Ratio
 
 % gets stuff provided by the teachers.
 :- [codigo_comum, puzzles_publicos].
@@ -26,8 +26,6 @@ permutacoes_soma(N, Els, Soma, Perms) :-
 	combinacoes_soma(N, Els, Soma, Combs),
 	findall(Perm, (member(X, Combs), permutation(X, Perm)), UPerms),
 	sort(1, @<, UPerms, Perms).
-
-%TENHO DE TROCAR O MEMBER POR OUTRA CENA
 
 % tou a 3+ horas nisto WOOOO WOOOO WOOOO
 % again tysm gaspa you are a real lifesaver, also trace helped a lot here
@@ -62,8 +60,6 @@ espaco_fila_aux([], Esp, _, Soma, Vars, Esps) :-
 	append(Esps, Space, NEsps),	%Appends the last space
 	member(Esp, NEsps).		%Gets a member from Esps
 
-%TENHO DE TROCAR O MEMBER POR OUTRA CENA
-
 %espacos_fila(H_V, Fila, Espacos)
 %Gets all spaces from a Fila and saves them in Esps
 espacos_fila(H_V, Fila, Esps) :-
@@ -90,7 +86,7 @@ espacos_puzzle_aux([L | R], H_V, OEsps, Esps) :-
 
 %espacos_com_posicoes_comuns(Espacos, Esp, Esps_com)
 %Order shouldn't be changed, Esps_com is a list with all the spaces that have shared variables with Esp
-%Thank You Joao Santos for helping me with this one, unifying is a real pain in the ass
+%Thank You Joao for helping me with this one, unifying is a real pain in the ass
 espacos_com_posicoes_comuns(Esps, Esp, Esps_com) :-
 	bagof(E, (member(E, Esps), E \== Esp, partilha(E, Esp)), Esps_com).
 
@@ -135,5 +131,30 @@ permutacoes_soma_aux([espaco(Soma, Vars) | R], OPerms, Perms_soma) :-
 	sort(1, @=<, XXPerms, Perms),
 	append(OPerms, [[espaco(Soma, Vars), Perms]], NPerms),
 	permutacoes_soma_aux(R, NPerms, Perms_soma).
-%ta qql cena mal neste sort, n ta a dar bem sort como devia ser
-%possivelmente ate esta bem, problema qualquer com as 2 primeiras variaveis
+
+%permutacao_possivel_espaco(Perm, Esp, Espacos, Perms_soma)
+%Perms_soma e' resultado do permutacoes_soma_espacos
+permutacao_possivel_espaco(Perm, Esp, Esps, Perms_soma) :-
+	permutacoes_soma_espacos(Esps, Perms_soma),
+	find_espaco_perm(Perms_soma, Esp, LL, Vars),
+	espacos_com_posicoes_comuns(Esps, Esp, Esps_com),
+	
+
+find_espaco_perm([], Esp, _) :- fail.
+find_espaco_perm([P | R], Esp, P, Vars) :-
+	espvars_esp_igual(P, Esp, Vars).
+find_espaco_perm([P | R], Esp, Res) :-
+	espvars_esp_dif(P, Esp),
+	find_espaco_perm(R, Esp, Res).
+
+espvars_esp_dif(P, Esp) :-
+	\+espvars_esp_nigual(P, Esp, _).
+
+espvars_esp_igual([E, Perms], Esp, Vars) :-
+	E =:= Esp,
+	get_sumvars(E, Vars).
+
+get_sumvars(espaco(_, Vars), Vars).
+	
+
+%meter TADs no fim
