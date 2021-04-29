@@ -90,22 +90,31 @@ espacos_puzzle_aux([L | R], H_V, OEsps, Esps) :-
 
 %espacos_com_posicoes_comuns(Espacos, Esp, Esps_com)
 %Order shouldn't be changed, Esps_com is a list with all the spaces that have shared variables with Esp
+%Thank You Joao Santos for helping me with this one, unifying is a real pain in the ass
 espacos_com_posicoes_comuns(Esps, Esp, Esps_com) :-
 	bagof(E, (member(E, Esps), E \== Esp, partilha(E, Esp)), Esps_com).
 
-%TENHO DE TROCAR O MEMBER POR OUTRA CENA
+espacos_com_posicoes_comuns(Esps, Esp, Esps_com) :-
+	\+bagof(E, (member(E, Esps), E \== Esp, partilha(E, Esp)), Esps_com).
 
 %Checks whether or not E shares variables with Esp
 partilha(espaco(_, Vars1), espaco(_, Vars2)) :-
-	busca_variaveis_comuns(Vars1, Vars2, Vars),
+	intersecao(Vars1, Vars2, Vars),
 	length(Vars, Len),
 	Len > 0.
 
-busca_variaveis_comuns(Vars1, Vars2, Vars) :-
-	bagof(Var, (member(Var, Vars1), is_in(Var, Vars2)), Vars).
+intersecao([], _, []) :- !.
 
-busca_variaveis_comuns(Vars1, Vars2, Vars) :-
-	\+bagof(Var, (member(Var, Vars1), is_in(Var, Vars2)), Vars).
+intersecao([P | R], Vars2, [P | Vars]) :-
+	is_in(P, Vars2), !,
+	intersecao(R, Vars2, Vars).
+
+intersecao([P | R], Vars2, Vars) :-
+	not_is_in(P, Vars2),
+	intersecao(R, Vars2, Vars).
+
+not_is_in(P, Vars) :-
+	\+is_in(P, Vars).
 
 is_in(_, []) :- fail, !.
 is_in(P, [F | _]) :- P == F, !.
