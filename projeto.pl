@@ -9,6 +9,7 @@
 soma_lista([], 0).
 soma_lista([P | R], Res) :- 
 	soma_lista(R, NRes), Res is P + NRes.
+%existe sum_list built-in
 
 % returns a list with N elements of Els that have sum equal to N.
 comb_soma_valida(N, Els, Soma, L) :- 
