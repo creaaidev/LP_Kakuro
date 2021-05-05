@@ -25,7 +25,9 @@ combinacoes_soma(N, Els, Soma, Combs) :-
 permutacoes_soma(N, Els, Soma, Perms) :-
 	combinacoes_soma(N, Els, Soma, Combs),
 	findall(Perm, (member(X, Combs), permutation(X, Perm)), UPerms),
-	sort(1, @<, UPerms, Perms).
+	sort(1, @<=, UPerms, Perms).
+
+% eu meti um = a seguir ao @<, verificar mais tarde
 
 % tou a 3+ horas nisto WOOOO WOOOO WOOOO
 % again tysm gaspa you are a real lifesaver, also trace helped a lot here
@@ -134,27 +136,6 @@ permutacoes_soma_aux([espaco(Soma, Vars) | R], OPerms, Perms_soma) :-
 
 %permutacao_possivel_espaco(Perm, Esp, Espacos, Perms_soma)
 %Perms_soma e' resultado do permutacoes_soma_espacos
-permutacao_possivel_espaco(Perm, Esp, Esps, Perms_soma) :-
-	permutacoes_soma_espacos(Esps, Perms_soma),
-	find_espaco_perm(Perms_soma, Esp, LL, Vars),
-	espacos_com_posicoes_comuns(Esps, Esp, Esps_com),
-	
-
-find_espaco_perm([], Esp, _) :- fail.
-find_espaco_perm([P | R], Esp, P, Vars) :-
-	espvars_esp_igual(P, Esp, Vars).
-find_espaco_perm([P | R], Esp, Res) :-
-	espvars_esp_dif(P, Esp),
-	find_espaco_perm(R, Esp, Res).
-
-espvars_esp_dif(P, Esp) :-
-	\+espvars_esp_nigual(P, Esp, _).
-
-espvars_esp_igual([E, Perms], Esp, Vars) :-
-	E =:= Esp,
-	get_sumvars(E, Vars).
-
-get_sumvars(espaco(_, Vars), Vars).
-	
-
+%olhar para as permutacoes_soma, findall faz mais do q eu penso normalmente
+%o afonso usou 3 e 1 .->
 %meter TADs no fim

@@ -25,7 +25,9 @@ combinacoes_soma(N, Els, Soma, Combs) :-
 permutacoes_soma(N, Els, Soma, Perms) :-
 	combinacoes_soma(N, Els, Soma, Combs),
 	findall(Perm, (member(X, Combs), permutation(X, Perm)), UPerms),
-	sort(1, @<, UPerms, Perms).
+	sort(1, @<=, UPerms, Perms).
+
+% eu meti um = a seguir ao @<, verificar mais tarde
 
 % tou a 3+ horas nisto WOOOO WOOOO WOOOO
 % again tysm gaspa you are a real lifesaver, also trace helped a lot here
@@ -156,5 +158,6 @@ espvars_esp_igual([E, Perms], Esp, Vars) :-
 
 get_sumvars(espaco(_, Vars), Vars).
 	
-
+%olhar para as permutacoes_soma, findall faz mais do q eu penso normalmente
+%o afonso usou 3 e 1 .->
 %meter TADs no fim
