@@ -146,15 +146,19 @@ permutacoes_soma_aux([espaco(Soma, Vars) | R], OPerms, Perms_soma) :-
 
 permutacao_possivel_espaco(Perm, Esp, Espacos, Perms_soma) :-
 	espacos_com_posicoes_comuns(Esps_coms, Esp),
+	cortar(Esps_coms, Perms_soma, ComPerms),
 	espaco_vars(Esp, EspVars),
 	espaco_soma(Esp, EspSoma),
 	length(EspVars, VarsLen),
 	permutacoes_soma(VarsLen, [1,2,3,4,5,6,7,8,9], Soma, PermsOrig),
-	findall(OrigPerm, (member(OrigPerm, PermsOrig), pp_esp(Esp, EspVars, Perms_soma)), OrigValid).
-%falta o resto
+	findall(OrigPerm, (member(OrigPerm, PermsOrig), pp_esp(OrigPerm, EspVars, ComPerms)), OrigValid).
 
-pp_esp(OrigPerm, EspVars, Perms_soma) :-
-	
-	
+pp_esp(OrigPerm, EspVars, ComPerms) :-
+	member(Var, EspVars),
+	findall(CPerm, (member(CPerm, ComPerms), pertence_comperm(Var, CPerm)), VCPerms),
+	maplist(pop
 
+pertence_comperm(Var, [Espaco, _]) :-
+	espaco_vars(Espaco, EspacoVars),
+	member(Var, EspacoVars).
 
