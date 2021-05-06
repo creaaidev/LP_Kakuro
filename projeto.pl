@@ -5,6 +5,10 @@
 % gets stuff provided by the teachers.
 :- [codigo_comum, puzzles_publicos].
 
+%TADS for espaco
+espaco_vars(espaco(_, Vars), Vars).
+espaco_soma(espaco(Soma, _), Soma).
+
 % gets the sum of the elements in a given list.
 soma_lista([], 0).
 soma_lista([P | R], Res) :- 
@@ -139,3 +143,18 @@ permutacoes_soma_aux([espaco(Soma, Vars) | R], OPerms, Perms_soma) :-
 %olhar para as permutacoes_soma, findall faz mais do q eu penso normalmente
 %o afonso usou 3 e 1 .->
 %meter TADs no fim
+
+permutacao_possivel_espaco(Perm, Esp, Espacos, Perms_soma) :-
+	espacos_com_posicoes_comuns(Esps_coms, Esp),
+	espaco_vars(Esp, EspVars),
+	espaco_soma(Esp, EspSoma),
+	length(EspVars, VarsLen),
+	permutacoes_soma(VarsLen, [1,2,3,4,5,6,7,8,9], Soma, PermsOrig),
+	findall(OrigPerm, (member(OrigPerm, PermsOrig), pp_esp(Esp, EspVars, Perms_soma)), OrigValid).
+%falta o resto
+
+pp_esp(OrigPerm, EspVars, Perms_soma) :-
+	
+	
+
+
