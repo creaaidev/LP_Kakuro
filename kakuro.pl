@@ -1,8 +1,7 @@
 % Martim Rosa Monis ist199281 :pray: :pavaobless:.
 
-
 % gets stuff provided by the teachers.
-:- [codigo_comum, puzzles_publicos].
+:- [codigo_comum].
 
 %TADS for espaco
 espaco_vars(espaco(_, Vars), Vars).
@@ -136,26 +135,26 @@ permutacoes_soma_aux([espaco(Soma, Vars) | R], OPerms, Perms_soma) :-
 %so existe um outro espaco comum em que a variavel pode existir :)
 permutacao_possivel_espaco(Perm, Esp, Espacos, Perms_soma) :-
 	espacos_com_posicoes_comuns(Espacos, Esp, Esps_coms),
-	include(ok_siga(Esps_coms), Perms_soma, ComPerms),
-	find_espaco(Perms_soma, Esp, EspVars, PermsOrig), %encontrar as variaveis do Esp e as suas Permutacoes
-	findall(OrigPerm, (member(OrigPerm, PermsOrig), pp_esp(EspVars, OrigPerm, ComPerms)), OrigValid), !, %encontrar as permutacoes validas
-	member(Perm, OrigValid). %selecionar uma permutacao valida
+	member(Espaco, Perms_soma),
+	Espaco = [Esp, Perms],
+	length(Esps_coms, Len),
+	findall(OrigPerm, (member(OrigPerm, Perms), verifica_unificavel(OrigPerm, Esps_coms, Perms_soma, 0, Len)), Res),
+	member(Perm, Res). 
 
-pp_esp([], [], _). %se deu match em todos os valores da permutacao original, entao e valida
+verifica_unificavel(_, _, _, Len, Len).
 
-pp_esp([Var | RVars], [OrigValue | RValues], ComPerms) :- 
-	pp_esp2(OrigValue, ComPerms, Var), %tentar dar match do valor da variavel
-	pp_esp(RVars, RValues, ComPerms). %prosseguir para a proxima variavel
+verifica_unificavel(OrigPerm, Esps_coms, Perms_soma, Index, Len) :-
+	black_magic(OrigPerm, Esps_coms, Perms_soma, Index),
+	NewIndex is Index+1,
+	verifica_unificavel(OrigPerm, Esps_coms, Perms_soma, NewIndex, Len).
 
-pp_esp2(OrigValue, ComPerms, Var) :-
-	findall(CPerm, (member(CPerm, ComPerms), pertence_comperm(Var, CPerm)), VCPerms), %VCPerms sao esp comuns, com perms e em que a Var aparece
-	selperms(VCPerms, [], VCPerms2),
-	append(VCPerms2, FlatPerms),
-	is_in(OrigValue, FlatPerms). %verificar que o valor existe
-
-pertence_comperm(Var, [Espaco, _]) :-
-	espaco_vars(Espaco, EspacoVars),
-	is_in(Var, EspacoVars).
+black_magic(OrigPerm, Esps_coms, Perms_soma, Index) :-
+	nth0(Index, Esps_coms, Esp1),
+       	member(Esp2, Perms_soma),
+       	Esp2 = [Esp1, PermsC],
+       	append(PermsC, Perms),
+	nth0(Index, OrigPerm, Value),
+	is_in(Value, Perms).
 
 selespaco([Espaco, _], Espaco).
 
@@ -165,16 +164,6 @@ selperms([[_, Perms] | R], Aux, ResPerms) :-
 	append(Aux, Perms, NAux),
 	selperms(R, NAux, ResPerms).
 
-find_espaco([[Espaco, Perms] | _], Espaco, EspVars, Perms) :-
-	espaco_vars(Espaco, EspVars).
-
-find_espaco([_ | R], Espaco, EspVars, Perms) :-
-	find_espaco(R, Espaco, EspVars, Perms).
-
-ok_siga(Esps_coms, X) :-
-	selespaco(X, Espaco),
-	is_in(Espaco, Esps_coms).
-
 %permutacoes_possiveis_espaco(Espacos, Perms_soma, Esp, Perms_poss)
 %
 %permutacoes_possiveis_espaco(Espacos, Perms_soma, Esp, Perms_poss) :-
@@ -183,8 +172,8 @@ ok_siga(Esps_coms, X) :-
 %append([EspVars], [Perms], Perms_poss), !.
 
 permutacoes_possiveis_espaco(Espacos, Perms_soma, Esp, [EspVars, Perms]) :-
-    espaco_vars(Esp, EspVars),
-    setof(Perm, Esp^permutacao_possivel_espaco(Perm, Esp, Espacos, Perms_soma), Perms), !.
+ 	espaco_vars(Esp, EspVars),
+	setof(Perm, Esp^permutacao_possivel_espaco(Perm, Esp, Espacos, Perms_soma), Perms), !.
 
 permutacoes_possiveis_espaco(_, _, _, []). %gaspa melita stuff
 
@@ -194,21 +183,14 @@ permutacoes_possiveis_espacos(Espacos, Perms_poss_esps) :-
 	bagof(Perm_poss, Espaco^(member(Espaco, Espacos), permutacoes_possiveis_espaco(Espacos, Perms_soma, Espaco, Perm_poss)), Perms_poss_esps).
 
 %numeros_comuns(Lst_Perms, Numeros_comuns)
-%get_index_value(1, [P | _], P).
-%get_index_value(Index, [_ | R], Value) :-
-%Index > 1,
-%NewIndex is Index-1,
-%get_index_value(NewIndex, R, Value).
-
 numeros_comuns(Lst_Perms, Numeros_comuns) :-
-	%get_index_value(1, Lst_Perms, Perm),
 	nth1(1, Lst_Perms, Perm),
 	length(Perm, LenPerm),
 	num_comuns_aux(Lst_Perms, [], Numeros_comuns, 1, LenPerm), !.
 
 num_comuns_aux(_, Numeros_comuns, Numeros_comuns, Index, LenPerm) :-
 	Index =:= LenPerm+1, !.
-%get_index_value(Index, X, Value)
+
 num_comuns_aux(Lst_Perms, Aux, Numeros_comuns, Index, LenPerm) :-
 	findall(Value, (member(X, Lst_Perms), nth1(Index, X, Value)), Values),
 	list_to_set(Values, SetValue),
@@ -269,42 +251,32 @@ simplifica(Perms_Possiveis, Novas_Perms_Possiveis) :-
 	atribui_comuns(Perms_Possiveis),
 	retira_impossiveis(Perms_Possiveis, Aux),
 	Aux \== Perms_Possiveis,
-	simplifica(Aux, Novas_Perms_Possiveis).
+	simplifica(Aux, Novas_Perms_Possiveis), !.
 
-simplifica(Perms_Possiveis, Perms_Possiveis).
+simplifica(Perms_Possiveis, Perms_Possiveis) :-
+	atribui_comuns(Perms_Possiveis),
+	retira_impossiveis(Perms_Possiveis, Aux),
+	Aux == Perms_Possiveis.
 
 %inicializa(Puzzle, Perms_Possiveis)
 inicializa(Puzzle, Perms_Possiveis) :-
 	espacos_puzzle(Puzzle, Espacos),
 	permutacoes_possiveis_espacos(Espacos, Old_Perms_Possiveis),
-	simplifica(Old_Perms_Possiveis, Perms_Possiveis).
+	simplifica(Old_Perms_Possiveis, Perms_Possiveis), !.
 
 %escolhe a permutacao possivel com o menor numero de alternativas, primeira que apareca
 %escolhe_menos_alternativas(Perms_Possiveis, Escolha)
 escolhe_menos_alternativas(Perms_Possiveis, Escolha) :-
 	include(verifica, Perms_Possiveis, Verificados),
-	Verificados \== [], 
-	nth0(0, Verificados, First),
-	length(First, FirstLen),
-	find_menor(Verificados, FirstLen, Menor),
-	include(permlen(Menor), Verificados, Yes), !,
-	nth0(0, Yes, Escolha).
+	Verificados \== [],
+	maplist(permlen, Verificados, Comprimentos),  
+	min_list(Comprimentos, Menor),
+	nth0(FirstMenor, Comprimentos, Menor), !,
+	nth0(FirstMenor, Verificados, Escolha).
 
-permlen(Menor, X) :-
+permlen(X, Len) :-
 	get_perms(X, Perms),
-	length(Perms, XLen),
-	XLen =:= Menor. 
-
-find_menor([], Menor, Menor).
-
-find_menor([Esp_e_Perms | R], Aux, Menor) :-
-	get_perms(Esp_e_Perms, Perms),
-	length(Perms, PermsLen),
-	PermsLen < Aux,
-	find_menor(R, PermsLen, Menor).
-
-find_menor([_ | R], Aux, Menor) :-
-	find_menor(R, Aux, Menor).
+	length(Perms, Len).
 
 verifica(Esp_e_Perms) :-
 	get_perms(Esp_e_Perms, Perms),
@@ -321,13 +293,13 @@ experimenta_perm(Escolha, Perms_Possiveis, Novas_Perms_Possiveis) :-
 	replace(Escolha, [EspVars, [Perm]], Perms_Possiveis, Novas_Perms_Possiveis).
 
 replace(_, _, [], []).
-replace(O, R, [O|T], [R|T2]) :- replace(O, R, T, T2).
-replace(O, R, [H|T], [H|T2]) :- H \= O, replace(O, R, T, T2).
+replace(O, R, [H|T], [R|T2]) :- H == O, replace(O, R, T, T2).
+replace(O, R, [H|T], [H|T2]) :- H \== O, replace(O, R, T, T2).
 
 %resolve_aux(Perms_Possiveis, Novas_Perms_Possiveis)
 resolve_aux(Perms_Possiveis, Novas_Perms_Possiveis) :-
-	escolhe_menos_alternativas(Perms_Possiveis, Escolha), !,
-	experimenta_perm(Escolha, Perms_Possiveis, NPermsExperimenta),
+	escolhe_menos_alternativas(Perms_Possiveis, Escolha), !, 
+	experimenta_perm(Escolha, Perms_Possiveis, NPermsExperimenta), 
 	simplifica(NPermsExperimenta, Novas_Perms_Aux),
 	resolve_aux(Novas_Perms_Aux, Novas_Perms_Possiveis).
 

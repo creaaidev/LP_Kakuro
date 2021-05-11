@@ -194,21 +194,14 @@ permutacoes_possiveis_espacos(Espacos, Perms_poss_esps) :-
 	bagof(Perm_poss, Espaco^(member(Espaco, Espacos), permutacoes_possiveis_espaco(Espacos, Perms_soma, Espaco, Perm_poss)), Perms_poss_esps).
 
 %numeros_comuns(Lst_Perms, Numeros_comuns)
-%get_index_value(1, [P | _], P).
-%get_index_value(Index, [_ | R], Value) :-
-%Index > 1,
-%NewIndex is Index-1,
-%get_index_value(NewIndex, R, Value).
-
 numeros_comuns(Lst_Perms, Numeros_comuns) :-
-	%get_index_value(1, Lst_Perms, Perm),
 	nth1(1, Lst_Perms, Perm),
 	length(Perm, LenPerm),
 	num_comuns_aux(Lst_Perms, [], Numeros_comuns, 1, LenPerm), !.
 
 num_comuns_aux(_, Numeros_comuns, Numeros_comuns, Index, LenPerm) :-
 	Index =:= LenPerm+1, !.
-%get_index_value(Index, X, Value)
+
 num_comuns_aux(Lst_Perms, Aux, Numeros_comuns, Index, LenPerm) :-
 	findall(Value, (member(X, Lst_Perms), nth1(Index, X, Value)), Values),
 	list_to_set(Values, SetValue),
@@ -283,28 +276,15 @@ inicializa(Puzzle, Perms_Possiveis) :-
 %escolhe_menos_alternativas(Perms_Possiveis, Escolha)
 escolhe_menos_alternativas(Perms_Possiveis, Escolha) :-
 	include(verifica, Perms_Possiveis, Verificados),
-	Verificados \== [], 
-	nth0(0, Verificados, First),
-	length(First, FirstLen),
-	find_menor(Verificados, FirstLen, Menor),
-	include(permlen(Menor), Verificados, Yes), !,
-	nth0(0, Yes, Escolha).
+	Verificados \== [],
+	maplist(permlen, Verificados, Comprimentos),  
+	min_list(Comprimentos, Menor),
+	nth0(FirstMenor, Comprimentos, Menor), !,
+	nth0(FirstMenor, Verificados, Escolha).
 
-permlen(Menor, X) :-
+permlen(X, Len) :-
 	get_perms(X, Perms),
-	length(Perms, XLen),
-	XLen =:= Menor. 
-
-find_menor([], Menor, Menor).
-
-find_menor([Esp_e_Perms | R], Aux, Menor) :-
-	get_perms(Esp_e_Perms, Perms),
-	length(Perms, PermsLen),
-	PermsLen < Aux,
-	find_menor(R, PermsLen, Menor).
-
-find_menor([_ | R], Aux, Menor) :-
-	find_menor(R, Aux, Menor).
+	length(Perms, Len).
 
 verifica(Esp_e_Perms) :-
 	get_perms(Esp_e_Perms, Perms),

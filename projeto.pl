@@ -1,5 +1,6 @@
 % Martim Rosa Monis ist199281 :pray: :pavaobless:.
 
+
 % gets stuff provided by the teachers.
 :- [codigo_comum, puzzles_publicos].
 
@@ -282,8 +283,28 @@ inicializa(Puzzle, Perms_Possiveis) :-
 %escolhe_menos_alternativas(Perms_Possiveis, Escolha)
 escolhe_menos_alternativas(Perms_Possiveis, Escolha) :-
 	include(verifica, Perms_Possiveis, Verificados),
-	Verificados \== [], !, 
-	member(Escolha, Verificados).
+	Verificados \== [], 
+	nth0(0, Verificados, First),
+	length(First, FirstLen),
+	find_menor(Verificados, FirstLen, Menor),
+	include(permlen(Menor), Verificados, Yes),
+	nth0(0, Yes, Escolha).
+
+permlen(Menor, X) :-
+	get_perms(X, Perms),
+	length(Perms, XLen),
+	XLen =:= Menor. 
+
+find_menor([], Menor, Menor).
+
+find_menor([Esp_e_Perms | R], Aux, Menor) :-
+	get_perms(Esp_e_Perms, Perms),
+	length(Perms, PermsLen),
+	PermsLen < Aux,
+	find_menor(R, PermsLen, Menor).
+
+find_menor([_ | R], Aux, Menor) :-
+	find_menor(R, Aux, Menor).
 
 verifica(Esp_e_Perms) :-
 	get_perms(Esp_e_Perms, Perms),
@@ -293,22 +314,15 @@ verifica(Esp_e_Perms) :-
 get_perms([_, Perms], Perms).
 
 %experimenta_perm(Escolha, Perms_Possiveis, Novas_Perms_Possiveis)
-experimenta_perm(Escolha, Perms_Possiveis, Perms_Possiveis) :-
-	get_perms(Escolha, Perms),
-	selespaco(Escolha, EspVars), !,
+experimenta_perm(Escolha, Perms_Possiveis, Novas_Perms_Possiveis) :-
+	Escolha = [EspVars, Perms], 
 	member(Perm, Perms),
-	EspVars = Perm.
+	EspVars = Perm,
+	replace(Escolha, [EspVars, [Perm]], Perms_Possiveis, Novas_Perms_Possiveis).
 
-substitui(Old, List, New, NewList) :-
-   	substitui_(List, Old, New, NewList).
-
-	substitui_([], _, _, []).
-   	substitui_([O|T0], Old, New, [V|T]) :-
-   	(   Old == O
-   	->  V = New
-   	;   V = O
-   	),
-   	substitui_(T0, Old, New, T).
+replace(_, _, [], []).
+replace(O, R, [O|T], [R|T2]) :- replace(O, R, T, T2).
+replace(O, R, [H|T], [H|T2]) :- H \= O, replace(O, R, T, T2).
 
 %resolve_aux(Perms_Possiveis, Novas_Perms_Possiveis)
 resolve_aux(Perms_Possiveis, Novas_Perms_Possiveis) :-
