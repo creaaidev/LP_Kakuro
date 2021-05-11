@@ -1,7 +1,5 @@
 % Martim Rosa Monis ist199281 :pray: :pavaobless:.
 
-% ?/20 Completeness Ratio
-
 % gets stuff provided by the teachers.
 :- [codigo_comum, puzzles_publicos].
 
@@ -29,7 +27,7 @@ combinacoes_soma(N, Els, Soma, Combs) :-
 permutacoes_soma(N, Els, Soma, Perms) :-
 	combinacoes_soma(N, Els, Soma, Combs),
 	findall(Perm, (member(X, Combs), permutation(X, Perm)), UPerms),
-	sort(1, @<=, UPerms, Perms).
+	sort(0, <, UPerms, Perms).
 
 % eu meti um = a seguir ao @<, verificar mais tarde
 
@@ -101,19 +99,11 @@ espacos_com_posicoes_comuns(Esps, Esp, Esps_com) :-
 
 %Checks whether or not E shares variables with Esp
 partilha(espaco(_, Vars1), espaco(_, Vars2)) :-
-	intersecao(Vars1, Vars2, Vars),
-	length(Vars, Len),
-	Len > 0.
+	append(Vars1, Vars2, VarsMix),
+	not_is_set(VarsMix).
 
-intersecao([], _, []) :- !.
-
-intersecao([P | R], Vars2, [P | Vars]) :-
-	is_in(P, Vars2), !,
-	intersecao(R, Vars2, Vars).
-
-intersecao([P | R], Vars2, Vars) :-
-	not_is_in(P, Vars2),
-	intersecao(R, Vars2, Vars).
+not_is_set(List) :-
+	\+is_set(List).
 
 not_is_in(P, Vars) :-
 	\+is_in(P, Vars).
@@ -132,33 +122,205 @@ permutacoes_soma_aux([], Perms_soma, Perms_soma).
 
 permutacoes_soma_aux([espaco(Soma, Vars) | R], OPerms, Perms_soma) :-
 	length(Vars, Len),
-	bagof(Perm, (permutacoes_soma(Len, [1,2,3,4,5,6,7,8,9], Soma, Perm)), XPerms),
-	append(XPerms, XXPerms),
-	sort(1, @=<, XXPerms, Perms),
+	setof(Perm, (permutacoes_soma(Len, [1,2,3,4,5,6,7,8,9], Soma, Perm)), XPerms),
+	append(XPerms, Perms),
 	append(OPerms, [[espaco(Soma, Vars), Perms]], NPerms),
 	permutacoes_soma_aux(R, NPerms, Perms_soma).
+
+%trocar o findall por setof
 
 %permutacao_possivel_espaco(Perm, Esp, Espacos, Perms_soma)
 %Perms_soma e' resultado do permutacoes_soma_espacos
 %olhar para as permutacoes_soma, findall faz mais do q eu penso normalmente
-%o afonso usou 3 e 1 .->
-%meter TADs no fim
-
+%so existe um outro espaco comum em que a variavel pode existir :)
 permutacao_possivel_espaco(Perm, Esp, Espacos, Perms_soma) :-
-	espacos_com_posicoes_comuns(Esps_coms, Esp),
-	cortar(Esps_coms, Perms_soma, ComPerms),
-	espaco_vars(Esp, EspVars),
-	espaco_soma(Esp, EspSoma),
-	length(EspVars, VarsLen),
-	permutacoes_soma(VarsLen, [1,2,3,4,5,6,7,8,9], Soma, PermsOrig),
-	findall(OrigPerm, (member(OrigPerm, PermsOrig), pp_esp(OrigPerm, EspVars, ComPerms)), OrigValid).
+	espacos_com_posicoes_comuns(Espacos, Esp, Esps_coms),
+	include(ok_siga(Esps_coms), Perms_soma, ComPerms),
+	find_espaco(Perms_soma, Esp, EspVars, PermsOrig), %encontrar as variaveis do Esp e as suas Permutacoes
+	findall(OrigPerm, (member(OrigPerm, PermsOrig), pp_esp(EspVars, OrigPerm, ComPerms)), OrigValid), !, %encontrar as permutacoes validas
+	member(Perm, OrigValid). %selecionar uma permutacao valida
 
-pp_esp(OrigPerm, EspVars, ComPerms) :-
-	member(Var, EspVars),
-	findall(CPerm, (member(CPerm, ComPerms), pertence_comperm(Var, CPerm)), VCPerms),
-	maplist(pop
+pp_esp([], [], _). %se deu match em todos os valores da permutacao original, entao e valida
+
+pp_esp([Var | RVars], [OrigValue | RValues], ComPerms) :- 
+	pp_esp2(OrigValue, ComPerms, Var), %tentar dar match do valor da variavel
+	pp_esp(RVars, RValues, ComPerms). %prosseguir para a proxima variavel
+
+pp_esp2(OrigValue, ComPerms, Var) :-
+	findall(CPerm, (member(CPerm, ComPerms), pertence_comperm(Var, CPerm)), VCPerms), %VCPerms sao esp comuns, com perms e em que a Var aparece
+	selperms(VCPerms, [], VCPerms2),
+	append(VCPerms2, FlatPerms),
+	is_in(OrigValue, FlatPerms). %verificar que o valor existe
 
 pertence_comperm(Var, [Espaco, _]) :-
 	espaco_vars(Espaco, EspacoVars),
-	member(Var, EspacoVars).
+	is_in(Var, EspacoVars).
 
+selespaco([Espaco, _], Espaco).
+
+selperms([], ResPerms, ResPerms).
+
+selperms([[_, Perms] | R], Aux, ResPerms) :-
+	append(Aux, Perms, NAux),
+	selperms(R, NAux, ResPerms).
+
+find_espaco([[Espaco, Perms] | _], Espaco, EspVars, Perms) :-
+	espaco_vars(Espaco, EspVars).
+
+find_espaco([_ | R], Espaco, EspVars, Perms) :-
+	find_espaco(R, Espaco, EspVars, Perms).
+
+ok_siga(Esps_coms, X) :-
+	selespaco(X, Espaco),
+	is_in(Espaco, Esps_coms).
+
+%permutacoes_possiveis_espaco(Espacos, Perms_soma, Esp, Perms_poss)
+%
+%permutacoes_possiveis_espaco(Espacos, Perms_soma, Esp, Perms_poss) :-
+%espaco_vars(Esp, EspVars),
+%findall(Perm, permutacao_possivel_espaco(Perm, Esp, Espacos, Perms_soma), Perms),
+%append([EspVars], [Perms], Perms_poss), !.
+
+permutacoes_possiveis_espaco(Espacos, Perms_soma, Esp, [EspVars, Perms]) :-
+    espaco_vars(Esp, EspVars),
+    setof(Perm, Esp^permutacao_possivel_espaco(Perm, Esp, Espacos, Perms_soma), Perms), !.
+
+permutacoes_possiveis_espaco(_, _, _, []). %gaspa melita stuff
+
+%permutacoes_possiveis_espacoS(Espacos, Perms_poss_esps)
+permutacoes_possiveis_espacos(Espacos, Perms_poss_esps) :-
+	permutacoes_soma_espacos(Espacos, Perms_soma),
+	bagof(Perm_poss, Espaco^(member(Espaco, Espacos), permutacoes_possiveis_espaco(Espacos, Perms_soma, Espaco, Perm_poss)), Perms_poss_esps).
+
+%numeros_comuns(Lst_Perms, Numeros_comuns)
+%get_index_value(1, [P | _], P).
+%get_index_value(Index, [_ | R], Value) :-
+%Index > 1,
+%NewIndex is Index-1,
+%get_index_value(NewIndex, R, Value).
+
+numeros_comuns(Lst_Perms, Numeros_comuns) :-
+	%get_index_value(1, Lst_Perms, Perm),
+	nth1(1, Lst_Perms, Perm),
+	length(Perm, LenPerm),
+	num_comuns_aux(Lst_Perms, [], Numeros_comuns, 1, LenPerm), !.
+
+num_comuns_aux(_, Numeros_comuns, Numeros_comuns, Index, LenPerm) :-
+	Index =:= LenPerm+1, !.
+%get_index_value(Index, X, Value)
+num_comuns_aux(Lst_Perms, Aux, Numeros_comuns, Index, LenPerm) :-
+	findall(Value, (member(X, Lst_Perms), nth1(Index, X, Value)), Values),
+	list_to_set(Values, SetValue),
+	num_comuns_aux2(SetValue, Aux, Index, NewAux),
+	NewIndex is Index+1,
+	num_comuns_aux(Lst_Perms, NewAux, Numeros_comuns, NewIndex, LenPerm).
+
+num_comuns_aux2(SetValue, Aux, _, Aux) :-
+	length(SetValue, SetLen),
+	SetLen \== 1.
+
+num_comuns_aux2([SetValue], Aux, Index, NewAux) :-
+	append(Aux, [(Index, SetValue)], NewAux).
+
+%atribui_comuns(Perms_Possiveis)
+atribui_comuns([PermPoss | R]) :-
+	unifica_comuns(PermPoss),
+	atribui_comuns(R).
+
+atribui_comuns([]).
+
+unifica_comuns([EspVars, Perms]) :-
+	numeros_comuns(Perms, Numeros_comuns),
+	atribui_valor(Numeros_comuns, EspVars).
+
+atribui_valor([], _).
+
+atribui_valor([PV | R], EspVars) :-
+	get_pos(PV, Pos),
+	get_valor(PV, Valor),
+	nth1(Pos, EspVars, Var),
+	Var = Valor,
+	atribui_valor(R, EspVars).
+
+get_pos((Pos, _), Pos).
+get_valor((_, Valor), Valor).
+
+%retira_impossiveis(Perms_Possiveis, Novas_Perms_Possiveis)
+retira_impossiveis(Perms_Possiveis, Novas_Perms_Possiveis) :-
+	retira_aux_1(Perms_Possiveis, [], Novas_Perms_Possiveis).
+
+retira_aux_1([], Novas_Perms_Possiveis, Novas_Perms_Possiveis).
+
+retira_aux_1([PermPoss | R], Aux, Novas_Perms_Possiveis) :-
+	retira_aux(PermPoss, UPermPoss),
+	append(Aux, [UPermPoss], NewAux),
+	retira_aux_1(R, NewAux, Novas_Perms_Possiveis).
+
+retira_aux([EspVars, Perms], UPermPoss) :-
+	findall(Perm, (member(Perm, Perms), testa_unifi(Perm, EspVars)), UnifPerms),
+	UPermPoss = [EspVars, UnifPerms].
+
+testa_unifi(Perm, EspVars) :-
+	\+ \+ Perm = EspVars.
+
+%simplifica(Perms_Possiveis, Novas_Perms_Possiveis)
+simplifica(Perms_Possiveis, Novas_Perms_Possiveis) :-
+	atribui_comuns(Perms_Possiveis),
+	retira_impossiveis(Perms_Possiveis, Aux),
+	Aux \== Perms_Possiveis,
+	simplifica(Aux, Novas_Perms_Possiveis).
+
+simplifica(Perms_Possiveis, Perms_Possiveis).
+
+%inicializa(Puzzle, Perms_Possiveis)
+inicializa(Puzzle, Perms_Possiveis) :-
+	espacos_puzzle(Puzzle, Espacos),
+	permutacoes_possiveis_espacos(Espacos, Old_Perms_Possiveis),
+	simplifica(Old_Perms_Possiveis, Perms_Possiveis).
+
+%escolhe a permutacao possivel com o menor numero de alternativas, primeira que apareca
+%escolhe_menos_alternativas(Perms_Possiveis, Escolha)
+escolhe_menos_alternativas(Perms_Possiveis, Escolha) :-
+	include(verifica, Perms_Possiveis, Verificados),
+	Verificados \== [], !, 
+	member(Escolha, Verificados).
+
+verifica(Esp_e_Perms) :-
+	get_perms(Esp_e_Perms, Perms),
+	length(Perms, Len),
+	Len > 1.
+
+get_perms([_, Perms], Perms).
+
+%experimenta_perm(Escolha, Perms_Possiveis, Novas_Perms_Possiveis)
+experimenta_perm(Escolha, Perms_Possiveis, Perms_Possiveis) :-
+	get_perms(Escolha, Perms),
+	selespaco(Escolha, EspVars), !,
+	member(Perm, Perms),
+	EspVars = Perm.
+
+substitui(Old, List, New, NewList) :-
+   	substitui_(List, Old, New, NewList).
+
+	substitui_([], _, _, []).
+   	substitui_([O|T0], Old, New, [V|T]) :-
+   	(   Old == O
+   	->  V = New
+   	;   V = O
+   	),
+   	substitui_(T0, Old, New, T).
+
+%resolve_aux(Perms_Possiveis, Novas_Perms_Possiveis)
+resolve_aux(Perms_Possiveis, Novas_Perms_Possiveis) :-
+	escolhe_menos_alternativas(Perms_Possiveis, Escolha), !,
+	experimenta_perm(Escolha, Perms_Possiveis, NPermsExperimenta),
+	simplifica(NPermsExperimenta, Novas_Perms_Aux),
+	resolve_aux(Novas_Perms_Aux, Novas_Perms_Possiveis).
+
+resolve_aux(Perms_Possiveis, Novas_Perms_Possiveis) :-
+	simplifica(Perms_Possiveis, Novas_Perms_Possiveis).
+
+%resolve(Puz)
+resolve(Puz) :-
+	inicializa(Puz, Perms_Possiveis),
+	resolve_aux(Perms_Possiveis, _).
